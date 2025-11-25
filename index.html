@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeyGen LiveAvatar Streaming - Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .api-url {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .api-url input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .card {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .card.selected {
+      border-color: #667eea;
+      background: #e8eaff;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      margin-top: 10px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      display: block;
+    }
+
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+      display: block;
+    }
+
+    .video-container {
+      margin-top: 20px;
+      text-align: center;
+      background: #000;
+      border-radius: 10px;
+      padding: 20px;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-container video {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 10px;
+    }
+
+    .video-container.placeholder {
+      color: #666;
+      background: #f5f5f5;
+    }
+
+    .info-box {
+      background: #f0f7ff;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .info-box strong {
+      color: #667eea;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎥 HeyGen LiveAvatar Streaming - Demo</h1>
+    <p class="subtitle">Real-time interactive avatar streaming with HeyGen API | FastAPI Backend + npm SDK</p>
+
+    <div class="info-box">
+      <strong>Free Tier Limits:</strong>
+      <ul style="margin: 10px 0; padding-left: 20px;">
+        <li>Resolution: 720p max</li>
+        <li>Session duration: 3 minutes max</li>
+        <li>Credits: 0.2 credits per minute</li>
+        <li>Monthly credits: 10 credits</li>
+      </ul>
+      <strong>💡 Tip:</strong> Keep sessions short (30-60 seconds) for testing!
+    </div>
+
+    <div class="api-url">
+      <label><strong>Backend URL:</strong></label>
+      <input type="text" id="backendUrl" value="http://localhost:3002" placeholder="http://localhost:3002">
+    </div>
+
+    <div class="section">
+      <h2>1️⃣ Select Avatar</h2>
+      <button class="btn" id="loadAvatarsBtn">Load Avatars</button>
+      <div id="avatars" class="grid"></div>
+    </div>
+
+    <div class="section">
+      <h2>2️⃣ Streaming Controls</h2>
+      <div class="controls">
+        <button class="btn" id="startBtn" disabled>🎬 Start Streaming Session</button>
+        <button class="btn danger" id="stopBtn" disabled>🛑 Stop Session</button>
+      </div>
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="section">
+      <h2>3️⃣ Video Stream</h2>
+      <div id="videoContainer" class="video-container placeholder">
+        <div>Video stream will appear here when session starts</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>4️⃣ Ask Question / Enter Input</h2>
+      <textarea id="textInput" placeholder="Ask a question, paste a URL, or enter text... (Will call RAG API first)">How do I build a voice agent with LiveKit?</textarea>
+      <small style="color: #666; display: block; margin-top: 5px;">💡 This will call RAG API first, then avatar will speak the answer</small>
+      <div class="controls" style="margin-top: 10px;">
+        <button class="btn" id="speakBtn" disabled>🤖 Get Answer & Speak</button>
+      </div>
+    </div>
+
+    <div class="section" id="answerSection" style="display: none;">
+      <h2>📝 RAG API Answer</h2>
+      <div id="answerText" style="background: #f9f9f9; padding: 15px; border-radius: 10px; border: 2px solid #e0e0e0; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
