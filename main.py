@@ -2,9 +2,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import httpx
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -22,6 +25,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Static files and SPA serving will be set up after all API routes
 
 
 async def heygen_get(endpoint: str):
@@ -259,13 +264,35 @@ async def chat(request: Request):
         )
 
 
+# Serve static files from dist folder (Vite build output) - MUST be after all API routes
+dist_path = Path(__file__).parent / "dist"
+if dist_path.exists():
+    # Mount static assets
+    assets_path = dist_path / "assets"
+    if assets_path.exists():
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+    
+    # Serve index.html for SPA routes (catch-all, must be last)
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str, request: Request):
+        """Serve SPA - return index.html for all non-API routes"""
+        # Skip if it's an API route or asset (shouldn't reach here due to route order, but safety check)
+        if full_path.startswith(("streaming_token", "avatars", "interactive_avatars", "voices", "chat", "assets", "docs", "openapi.json")):
+            return JSONResponse(status_code=404, content={"error": "Not found"})
+        
+        index_file = dist_path / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return JSONResponse(status_code=404, content={"error": "Frontend not built"})
+
+
 if __name__ == "__main__":
     import uvicorn
+    port = int(os.getenv("PORT", 3002))
     uvicorn.run(
         app, 
         host="0.0.0.0", 
-        port=3002, 
-        reload=True,
-        reload_excludes=["node_modules/**", "__pycache__/**"]
+        port=port,
+        reload=False  # Disable reload in production
     )
 

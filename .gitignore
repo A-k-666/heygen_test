@@ -32,3 +32,6 @@ test_*.py
 # OS files
 Thumbs.db
 .DS_Store
+
+# Keep requirements.txt for deployment
+!requirements.txt

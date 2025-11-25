@@ -2,7 +2,16 @@
 import { StreamingAvatarApi, Configuration } from '@heygen/streaming-avatar';
 
 // Configuration
-const BACKEND_URL = () => document.getElementById('backendUrl').value.trim() || 'http://localhost:3002';
+// Use relative URL in production (same domain), or user input, or localhost for dev
+const BACKEND_URL = () => {
+  const input = document.getElementById('backendUrl')?.value.trim();
+  if (input) return input;
+  // In production (deployed), use relative URL
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return ''; // Relative URL - same domain as frontend
+  }
+  return 'http://localhost:3002'; // Default for local dev
+};
 
 // State
 let avatar = null;
